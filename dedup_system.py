@@ -1,5 +1,8 @@
+import argparse
+import json
 import sqlite3
 from dataclasses import dataclass
+from dataclasses import asdict
 from typing import Iterable
 
 
@@ -110,9 +113,56 @@ class DataRedundancyRemovalSystem:
         self.connection.close()
 
 
+def save_report(path: str, report: dict) -> None:
+    with open(path, "w", encoding="utf-8") as report_file:
+        json.dump(report, report_file, indent=2)
+        report_file.write("\n")
+
+
+def run_demo(entries: Iterable[str], db_path: str, output_path: str) -> dict:
+    system = DataRedundancyRemovalSystem(db_path)
+    results = []
+    summary = {"unique": 0, "redundant": 0, "false_positive": 0}
+
+    try:
+        for entry in entries:
+            result = system.validate_and_append(entry)
+            result_record = {"input": entry, **asdict(result)}
+            results.append(result_record)
+            summary[result.classification] += 1
+            print(result_record)
+
+        report = {
+            "summary": summary,
+            "entries": results,
+            "saved_rows": system.count_entries(),
+            "database": db_path,
+        }
+        save_report(output_path, report)
+        return report
+    finally:
+        system.close()
+
+
 if __name__ == "__main__":
-    system = DataRedundancyRemovalSystem()
-    print(system.validate_and_append("Alice"))
-    print(system.validate_and_append(" alice "))
-    print(system.validate_and_append("N/A"))
-    system.close()
+    parser = argparse.ArgumentParser(description="Run the redundancy-removal demo.")
+    parser.add_argument(
+        "--db",
+        default="cloud_data.db",
+        help="SQLite database used to store unique entries.",
+    )
+    parser.add_argument(
+        "--output",
+        default="dedup_results.json",
+        help="Path to the JSON report written after processing.",
+    )
+    parser.add_argument(
+        "entries",
+        nargs="*",
+        help="Optional entries to process. If omitted, a sample dataset is used.",
+    )
+    args = parser.parse_args()
+
+    sample_entries = ["Alice", " alice ", "N/A", "Customer-123", "customer-123", "Beta", "ok"]
+    entries = args.entries if args.entries else sample_entries
+    run_demo(entries, args.db, args.output)

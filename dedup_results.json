@@ -1,0 +1,53 @@
+{
+  "summary": {
+    "unique": 3,
+    "redundant": 2,
+    "false_positive": 2
+  },
+  "entries": [
+    {
+      "input": "Alice",
+      "classification": "unique",
+      "reason": "Entry validated and appended to cloud database.",
+      "added": true
+    },
+    {
+      "input": " alice ",
+      "classification": "redundant",
+      "reason": "Duplicate entry already exists in cloud database.",
+      "added": false
+    },
+    {
+      "input": "N/A",
+      "classification": "false_positive",
+      "reason": "Entry is invalid or too short.",
+      "added": false
+    },
+    {
+      "input": "Customer-123",
+      "classification": "unique",
+      "reason": "Entry validated and appended to cloud database.",
+      "added": true
+    },
+    {
+      "input": "customer-123",
+      "classification": "redundant",
+      "reason": "Duplicate entry already exists in cloud database.",
+      "added": false
+    },
+    {
+      "input": "Beta",
+      "classification": "unique",
+      "reason": "Entry validated and appended to cloud database.",
+      "added": true
+    },
+    {
+      "input": "ok",
+      "classification": "false_positive",
+      "reason": "Entry is invalid or too short.",
+      "added": false
+    }
+  ],
+  "saved_rows": 3,
+  "database": "demo_cloud_data.db"
+}
